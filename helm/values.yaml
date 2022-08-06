@@ -1,9 +1,9 @@
 image:
-  repository: Ashikuroff/devops-toolkit-series
+  repository:  vfarcic/devops-toolkit-series
   tag: latest
   pullPolicy: IfNotPresent
 ingress:
-  enabled: false
+  enabled: true
   host: devopstoolkitseries.com
 resources:
   limits:
