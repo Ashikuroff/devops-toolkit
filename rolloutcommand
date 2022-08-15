@@ -1,0 +1,48 @@
+kubectl create namespace argo-rollouts
+
+kubectl --namespace argo-rollouts apply \
+    --filename https://raw.githubusercontent.com/argoproj/argo-rollouts/stable/manifests/install.yaml
+
+istioctl install --skip-confirmation
+
+export ISTIO_HOST=127.0.0.1
+
+helm upgrade --install \
+    devops-toolkit helm \
+    --namespace devops-toolkit \
+    --create-namespace \
+    --values rollout/values-pause-x2.yaml \
+    --set image.tag=2.6.2 \
+    --wait
+
+
+kubectl argo rollouts \
+    --namespace devops-toolkit \
+    get rollout devops-toolkit-devops-toolkit \
+    --watch
+
+####################################################
+# Deploying New Releases Using The Canary Strategy #
+####################################################
+
+helm upgrade devops-toolkit helm \
+    --namespace devops-toolkit \
+    --reuse-values \
+    --set image.tag=2.9.9
+
+kubectl argo rollouts \
+    --namespace devops-toolkit \
+    get rollout devops-toolkit-devops-toolkit \
+    --watch
+
+
+kubectl argo rollouts \
+    --namespace devops-toolkit \
+    promote devops-toolkit-devops-toolkit
+
+###Rolling back previous release
+
+helm upgrade devops-toolkit helm \
+    --namespace devops-toolkit \
+    --reuse-values \
+    --set image.tag=2.9.9
